@@ -32,7 +32,7 @@ This repository utilizes GitHub Actions to enforce a "Shift-Left" methodology:
 
 ```hcl
 module "hpc_cluster_production" {
-  source            = "git::[https://github.com/markchisholm/ethereal-spot-manager.git](https://github.com/markchisholm/ethereal-spot-manager.git)"
+  source            = "git::[https://github.com/markchisholm/ethereal-spot-manager.git](https://github.com/MarkChisholm-dev/ethereal-spot-manager.git)"
   version           = "1.2.0"
   
   instance_type     = "g4dn.xlarge"
