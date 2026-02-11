@@ -1,0 +1,33 @@
+name: Financial Operations (FinOps) Check
+on: [pull_request]
+
+jobs:
+  infracost:
+    name: Infracost Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api_key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Generate Cost Estimate
+        run: |
+          infracost breakdown --path . \
+                              --format json \
+                              --out-file /tmp/infracost.json
+
+      - name: Post Cost Comment
+        run: |
+          infracost comment github --path /tmp/infracost.json \
+                                   --repo $GITHUB_REPOSITORY \
+                                   --github-token ${{ github.token }} \
+                                   --pull-request ${{ github.event.pull_request.number }} \
+                                   --behavior update
