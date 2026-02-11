@@ -1,6 +1,6 @@
 # Ethereal Spot Compute Orchestrator
 
-# Passing
+# Security Compliance Badge
 [![Security Compliance Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml)
 
 # Stack
