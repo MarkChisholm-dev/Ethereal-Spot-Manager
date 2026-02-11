@@ -1,43 +1,45 @@
 # Ethereal Spot Compute Orchestrator
-**Engineering Group:** Platform & Infrastructure
-**Lead Contributor:** Mark Chisholm
 
-## 1. Overview
-The Ethereal Spot Compute Orchestrator is a production-grade Terraform module designed to handle high-performance computing (HPC) workloads. It manages the lifecycle of GPU-intensive clusters by leveraging AWS Mixed Instances Policies to balance cost-efficiency with operational resilience.
+[![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232088FF.svg?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
+[![Security: Trivy](https://img.shields.io/badge/Security-Trivy-blue?style=for-the-badge)](https://github.com/aquasecurity/trivy)
+[![FinOps: Infracost](https://img.shields.io/badge/FinOps-Infracost-green?style=for-the-badge)](https://www.infracost.io/)
 
-## 2. Problem Statement
-Clients requiring large-scale data processing or AI training models often face prohibitive cloud expenditure when using standard On-Demand instances. Traditional Spot Instance usage carries the risk of sudden termination, which can disrupt long-running compute jobs.
+## Overview
+The **Ethereal Spot Compute Orchestrator** is a specialized Terraform module engineered for High-Performance Computing (HPC) environments. It automates the provisioning of GPU-accelerated clusters by utilizing a proprietary Mixed Instances Policy, balancing mission-critical reliability with aggressive cost-optimization.
 
-## 3. Solution Architecture
-This module implements a hybrid provisioning strategy:
-* **Baseline Reliability:** Provisions a configurable base of On-Demand instances to maintain core services.
-* **Elastic Scaling:** Dynamically fills additional capacity using Spot Instances.
-* **Automated Fallback:** Native ASG logic handles fallback to On-Demand capacity in the event of Spot price spikes or capacity unavailability.
-* **Security Compliance:** Enforces AES-256 encryption on all EBS volumes and restricts nodes to private subnets.
+Developed as a core component of the **Ethereal Cloud Systems** infrastructure suite, this tool allows for the seamless scaling of decentralized compute nodes across multi-region AWS environments.
 
 
 
-## 4. Technical Specifications
-### 4.1 Prerequisites
-* Terraform >= 1.0.0
-* AWS Provider >= 4.0
-* Pre-configured KMS Key for encryption
+## Key Engineering Patterns
 
-### 4.2 Module Configuration
-| Parameter | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `on_demand_base` | number | 2 | Minimum guaranteed On-Demand nodes. |
-| `instance_type` | string | g4dn.xlarge | Primary GPU instance type. |
-| `spot_strategy` | string | capacity-optimized | Allocation strategy for Spot instances. |
-| `disk_size` | number | 100 | Volume size in GB. |
+* **Resilient Spot Orchestration:** Implements a `capacity-optimized` allocation strategy with an automated On-Demand fallback to ensure zero downtime during Spot interruptions.
+* **Encrypted Data Planes:** Enforces AES-256 EBS encryption at rest, utilizing AWS KMS for TPN-compliant (Trusted Partner Network) data security.
+* **Automated FinOps:** Integrated CI/CD hooks provide real-time cost-differential analysis on every infrastructure pull request.
+* **Zero-Trust Networking:** Provisions resources exclusively within isolated private subnets with strictly defined egress filtering.
 
-## 5. Deployment Example
+## CI/CD Pipeline Architecture
+This repository utilizes GitHub Actions to enforce a "Shift-Left" methodology:
+1.  **Validation:** Syntactic and formatting checks via `terraform fmt` and `validate`.
+2.  **Security:** Static Analysis Security Testing (SAST) via **Trivy** to prevent configuration drift.
+3.  **Cost Governance:** Automated spend forecasting via **Infracost**.
+
+
+
+## Deployment Example
+
 ```hcl
-module "hpc_cluster" {
-  source            = "./modules/ethereal-spot-manager"
-  ami_id            = "ami-07c1234567890"
-  subnet_ids        = ["subnet-123", "subnet-456"]
+module "hpc_cluster_production" {
+  source            = "git::[https://github.com/markchisholm/ethereal-spot-manager.git](https://github.com/markchisholm/ethereal-spot-manager.git)"
+  version           = "1.2.0"
+  
+  instance_type     = "g4dn.xlarge"
   on_demand_base    = 5
-  desired_capacity  = 25
-  security_group_id = "sg-0987654321"
+  desired_capacity  = 50
+  
+  # Security configuration
+  kms_key_arn       = "arn:aws:kms:eu-west-1:123456789012:key/..."
+  subnet_ids        = ["subnet-0a1b2c3d", "subnet-4e5f6g7h"]
 }
