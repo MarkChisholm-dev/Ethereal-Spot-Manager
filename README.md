@@ -4,7 +4,6 @@
 [![Security Compliance Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml)
 
 [![Security: TPN](https://img.shields.io/badge/Compliance-TPN--Ready-red?style=for-the-badge)](https://www.ttpn.org/)
-[![Security: SOC2](https://img.shields.io/badge/Compliance-SOC2-blue?style=for-the-badge)](https://www.aicpa.org/soc2)
 
 # Stack
 [![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
