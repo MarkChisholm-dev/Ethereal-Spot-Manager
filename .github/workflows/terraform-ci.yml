@@ -5,7 +5,7 @@ on:
 
 jobs:
   validate:
-    name: Terraform Validate
+    name: Security & Validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -22,3 +22,22 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+
+      # --- NEW: Security Scanning ---
+      - name: Run Trivy IAC Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1' # This fails the pipeline if security issues are found
+          severity: 'HIGH,CRITICAL'
+
+      # --- NEW: Infrastructure Linting ---
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Run TFLint
+        run: tflint -f compact
