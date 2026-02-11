@@ -1,10 +1,13 @@
 # Ethereal Spot Compute Orchestrator
 
+# Passing
+[![Security Compliance Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml)
+
+# Stack
 [![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 [![GitHub Actions](https://img.shields.io/badge/github%20actions-%232088FF.svg?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Security: Trivy](https://img.shields.io/badge/Security-Trivy-blue?style=for-the-badge)](https://github.com/aquasecurity/trivy)
-[![Security Compliance Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml)
 [![FinOps: Infracost](https://img.shields.io/badge/FinOps-Infracost-green?style=for-the-badge)](https://www.infracost.io/)
 
 ## Overview
