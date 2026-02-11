@@ -49,3 +49,12 @@ module "hpc_cluster_production" {
   kms_key_arn       = "arn:aws:kms:eu-west-1:123456789012:key/..."
   subnet_ids        = ["subnet-0a1b2c3d", "subnet-4e5f6g7h"]
 }
+
+```
+
+```mermaid
+graph TD
+    A[User] -->|Triggers| B(GitHub Action)
+    B --> C{Terraform Plan}
+    C -->|Approved| D[AWS Infrastructure]
+    C -->|Rejected| E[Error Logs]
