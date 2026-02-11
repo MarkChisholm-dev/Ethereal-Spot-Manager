@@ -17,7 +17,13 @@ The **Ethereal Spot Compute Orchestrator** is a specialized Terraform module eng
 
 Developed as a core component of the **Ethereal Cloud Systems** infrastructure suite, this tool allows for the seamless scaling of decentralized compute nodes across multi-region AWS environments.
 
-
+```mermaid
+graph TD
+    A[User] -->|Triggers| B(GitHub Action)
+    B --> C{Terraform Plan}
+    C -->|Approved| D[AWS Infrastructure]
+    C -->|Rejected| E[Error Logs]
+```
 
 ## Key Engineering Patterns
 
@@ -52,9 +58,3 @@ module "hpc_cluster_production" {
 
 ```
 
-```mermaid
-graph TD
-    A[User] -->|Triggers| B(GitHub Action)
-    B --> C{Terraform Plan}
-    C -->|Approved| D[AWS Infrastructure]
-    C -->|Rejected| E[Error Logs]
