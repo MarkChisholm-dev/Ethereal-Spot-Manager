@@ -75,7 +75,7 @@ jobs:
         continue-on-error: true
 
       - name: Store Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: /tmp/tfplan
@@ -132,7 +132,7 @@ jobs:
         continue-on-error: true
 
       - name: Download Saved Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: /tmp/
@@ -142,7 +142,7 @@ jobs:
         continue-on-error: true
 
       - name: Save Terraform State
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-state
           path: .terraform/**
