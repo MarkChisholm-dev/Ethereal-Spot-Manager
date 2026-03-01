@@ -2,6 +2,10 @@
 
 # Security Compliance Badge
 [![📚 Docs](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml)
+[![🔒 Security Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml)
+[![🚀 Deploy Infrastructure](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml)
+[![🧪 Test Suite](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/test.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/test.yml)
+[![🔍 Validate & Lint](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/validate.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/validate.yml)
 
 [![Security: TPN](https://img.shields.io/badge/Compliance-TPN--Ready-red?style=for-the-badge)](https://www.ttpn.org/)
 
