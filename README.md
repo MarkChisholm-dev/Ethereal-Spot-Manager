@@ -1,6 +1,5 @@
 # Ethereal Spot Compute Orchestrator
 
-# Security Compliance Badge
 [![📚 Docs](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml)
 [![🔒 Security Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml)
 [![🚀 Deploy Infrastructure](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml)
