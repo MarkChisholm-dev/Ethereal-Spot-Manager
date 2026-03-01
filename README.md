@@ -285,6 +285,8 @@ output "cluster_asg_name" {
 
 ## Quick Start
 
+### Local Testing (No Deployment)
+
 1. **Clone and test locally:**
 ```bash
 git clone https://github.com/MarkChisholm-dev/ethereal-spot-manager.git
@@ -294,16 +296,41 @@ cd ethereal-spot-manager
 ./test.sh
 ```
 
-2. **Configure your deployment:**
+2. **Configure and validate:**
 ```bash
 # Copy example variables
 cp terraform.tfvars.example terraform.tfvars
 
-# Edit with your values
+# Edit with your test values
 vi terraform.tfvars
+
+# Validate the configuration
+terraform validate
 ```
 
-3. **Deploy:**
+### Automated Deployment via GitHub Actions
+
+To enable automatic deployment on push to `main`:
+
+1. **Set GitHub Secrets** in your repository (Settings → Secrets and variables → Actions):
+
+   **AWS Authentication:**
+   - `AWS_ACCESS_KEY_ID` - Your AWS access key
+   - `AWS_SECRET_ACCESS_KEY` - Your AWS secret key
+   - `AWS_REGION` - (optional, defaults to `us-east-1`)
+
+   **Infrastructure Variables:**
+   - `TF_VAR_AMI_ID` - EC2 AMI ID for compute instances
+   - `TF_VAR_KMS_KEY_ARN` - KMS key ARN for encryption
+   - `TF_VAR_SUBNET_IDS` - JSON array of subnet IDs
+   - `TF_VAR_SECURITY_GROUP_ID` - Security group ID
+
+2. **Trigger deployment** (automatically on push or manual via Actions tab)
+
+For detailed setup instructions, see [TESTING.md](TESTING.md#cidcd-github-actions-setup).
+
+### Local Deployment (Terraform CLI)
+
 ```bash
 terraform init
 terraform plan

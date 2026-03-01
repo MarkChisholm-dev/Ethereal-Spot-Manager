@@ -37,31 +37,13 @@ jobs:
         run: |
           if [ -z "$AWS_ACCESS_KEY_ID" ]; then
             echo "❌ AWS_ACCESS_KEY_ID not configured"
-            echo "ℹ️  Set AWS credentials in repo secrets for deployment"
+            echo "ℹ️  Required GitHub secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY"
             exit 1
           fi
           echo "✅ AWS credentials available"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         continue-on-error: true
-
-      - name: Check for terraform.tfvars
-        run: |
-          echo "📋 Checking deployment configuration..."
-          if [ ! -f terraform.tfvars ]; then
-            echo "⚠️  WARNING: terraform.tfvars not found"
-            echo ""
-            echo "To complete deployment, you MUST commit terraform.tfvars with:"
-            echo "  • ami_id"
-            echo "  • kms_key_arn"
-            echo "  • subnet_ids"
-            echo "  • security_group_id"
-            echo ""
-            echo "See terraform.tfvars.example for template"
-            echo "⏭️  Continuing with validation..."
-          else
-            echo "✅ terraform.tfvars found"
-          fi
 
   plan:
     name: Generate Production Plan
@@ -84,21 +66,27 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
         continue-on-error: true
 
-      - name: Check for terraform.tfvars
+      - name: Generate terraform.tfvars from Secrets
         run: |
-          if [ ! -f terraform.tfvars ]; then
-            echo "❌ ERROR: terraform.tfvars file not found"
-            echo ""
-            echo "To deploy, you must create terraform.tfvars with required variables:"
-            echo "  ami_id = \"ami-xxxxx\""
-            echo "  kms_key_arn = \"arn:aws:kms:...\""
-            echo "  subnet_ids = [\"subnet-xxx\", \"subnet-yyy\"]"
-            echo "  security_group_id = \"sg-xxxxx\""
-            echo ""
-            echo "See terraform.tfvars.example for reference"
-            exit 1
-          fi
-          echo "✅ terraform.tfvars found and will be used"
+          cat > terraform.tfvars << 'EOF'
+          # Variables generated from GitHub Secrets
+          ami_id            = "${{ secrets.TF_VAR_AMI_ID }}"
+          kms_key_arn       = "${{ secrets.TF_VAR_KMS_KEY_ARN }}"
+          subnet_ids        = ${{ secrets.TF_VAR_SUBNET_IDS }}
+          security_group_id = "${{ secrets.TF_VAR_SECURITY_GROUP_ID }}"
+          
+          # Optional: Override defaults if needed
+          # instance_type           = "${{ secrets.TF_VAR_INSTANCE_TYPE || 'g4dn.xlarge' }}"
+          # desired_capacity        = ${{ secrets.TF_VAR_DESIRED_CAPACITY || '10' }}
+          # environment             = "${{ secrets.TF_VAR_ENVIRONMENT || 'production' }}"
+          EOF
+          
+          echo "✅ terraform.tfvars generated from GitHub Secrets"
+          echo "📋 Deployed configuration:"
+          echo "  - AMI ID: ${{ secrets.TF_VAR_AMI_ID }}"
+          echo "  - KMS Key: ${{ secrets.TF_VAR_KMS_KEY_ARN }}"
+          echo "  - Subnets: ${{ secrets.TF_VAR_SUBNET_IDS }}"
+          echo "  - Security Group: ${{ secrets.TF_VAR_SECURITY_GROUP_ID }}"
 
       - name: Terraform Init
         run: terraform init
@@ -106,6 +94,9 @@ jobs:
 
       - name: Generate Plan
         run: terraform plan -input=false -out=/tmp/tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         continue-on-error: true
 
       - name: Store Plan Artifact
@@ -160,6 +151,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
         continue-on-error: true
+
+      - name: Generate terraform.tfvars from Secrets
+        run: |
+          cat > terraform.tfvars << 'EOF'
+          # Variables generated from GitHub Secrets for deployment
+          ami_id            = "${{ secrets.TF_VAR_AMI_ID }}"
+          kms_key_arn       = "${{ secrets.TF_VAR_KMS_KEY_ARN }}"
+          subnet_ids        = ${{ secrets.TF_VAR_SUBNET_IDS }}
+          security_group_id = "${{ secrets.TF_VAR_SECURITY_GROUP_ID }}"
+          EOF
+          
+          echo "✅ terraform.tfvars generated for apply"
 
       - name: Terraform Init
         run: terraform init

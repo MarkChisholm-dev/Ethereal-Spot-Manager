@@ -1,0 +1,23 @@
+#!/bin/bash
+echo "🔍 GitHub Actions Diagnostics"
+echo "=============================="
+echo ""
+echo "✅ Local Repository Status:"
+echo "  Current branch: $(git branch --show-current)"
+echo "  Remote URL: $(git remote get-url origin)"
+echo "  Latest commit: $(git log -1 --oneline)"
+echo ""
+echo "✅ Workflow Files Status:"
+for workflow in .github/workflows/*.yml; do
+    echo "  📄 $(basename $workflow)"
+    grep -A1 "branches:" "$workflow" | grep -v "^--$" || echo "    (no branch filter)"
+done
+echo ""
+echo "✅ Branch Verification:"
+git ls-remote --heads origin | grep main && echo "  ✓ main branch exists on GitHub" || echo "  ✗ main branch NOT found on GitHub"
+echo ""
+echo "💡 Next Steps:"
+echo "  1. Visit: https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions"
+echo "  2. Check if the LATEST run (after commit 3f5c5cb) passes"
+echo "  3. Ignore old failed runs from before the fix"
+echo ""

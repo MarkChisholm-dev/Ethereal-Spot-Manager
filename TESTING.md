@@ -190,6 +190,69 @@ chmod +x test.sh
 ./test.sh
 ```
 
+## CI/CD GitHub Actions Setup
+
+The repository has GitHub Actions configured for automated testing and deployment. To enable the **deploy workflow**, you must configure required GitHub Secrets:
+
+### Required Secrets (for Deployment)
+
+Set these in your GitHub repository settings: **Settings → Secrets and variables → Actions**
+
+**AWS Authentication Secrets:**
+- `AWS_ACCESS_KEY_ID` - Your AWS access key ID
+- `AWS_SECRET_ACCESS_KEY` - Your AWS secret access key  
+- `AWS_REGION` (optional) - AWS region (defaults to `us-east-1`)
+
+**Terraform Variables Secrets** (populate from your AWS environment):
+- `TF_VAR_AMI_ID` - EC2 AMI ID (e.g., `ami-0c55b159cbfafe1f0`)
+- `TF_VAR_KMS_KEY_ARN` - KMS key ARN (e.g., `arn:aws:kms:us-east-1:123456789012:key/xxxxx`)
+- `TF_VAR_SUBNET_IDS` - JSON list of subnet IDs (e.g., `["subnet-12345678", "subnet-87654321"]`)
+- `TF_VAR_SECURITY_GROUP_ID` - Security group ID (e.g., `sg-0123456789abcdef0`)
+
+### How to Add Secrets in GitHub UI
+
+1. Navigate to your repository
+2. Click **Settings**
+3. Go to **Secrets and variables** → **Actions**
+4. Click **New repository secret**
+5. Enter the secret name and value
+6. Click **Add secret**
+
+### Example Secret Values
+
+| Secret Name | Example Value |
+|-------------|---------------|
+| `AWS_ACCESS_KEY_ID` | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY` | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `AWS_REGION` | `us-east-1` |
+| `TF_VAR_AMI_ID` | `ami-0c55b159cbfafe1f0` |
+| `TF_VAR_KMS_KEY_ARN` | `arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012` |
+| `TF_VAR_SUBNET_IDS` | `["subnet-12345678", "subnet-87654321"]` |
+| `TF_VAR_SECURITY_GROUP_ID` | `sg-0123456789abcdef0` |
+
+### ⚠️ Important Security Notes
+
+- **Never commit secrets** to your repository (they're git-ignored for `.tfvars`)
+- **Use minimal permissions** - Create IAM users with only required permissions
+- **Rotate credentials regularly** - Update GitHub secrets quarterly
+- **Use AWS temporary credentials** when possible (STS)
+- **Secrets are encrypted** by GitHub and never logged in workflow output
+
+### Managing Variable Files Locally
+
+For **local testing**, you can create an untracked `terraform.tfvars` file:
+
+```bash
+# Create from example
+cp terraform.tfvars.example terraform.tfvars
+
+# Edit with your real values
+vi terraform.tfvars
+
+# This file is in .gitignore, so it won't be committed
+git status  # terraform.tfvars should NOT appear
+```
+
 ## CI/CD (Already Configured)
 
 The repository already has GitHub Actions configured for:
