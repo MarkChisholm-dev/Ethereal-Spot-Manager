@@ -1,5 +1,7 @@
 name: Financial Operations (FinOps) Check
-on: [pull_request]
+on:
+  pull_request:
+    branches: [ main ]
 
 jobs:
   infracost:
@@ -12,6 +14,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
@@ -27,7 +31,7 @@ jobs:
       - name: Post Cost Comment
         run: |
           infracost comment github --path /tmp/infracost.json \
-                                   --repo $GITHUB_REPOSITORY \
+                                   --repo ${{ github.repository }} \
                                    --github-token ${{ github.token }} \
                                    --pull-request ${{ github.event.pull_request.number }} \
                                    --behavior update
