@@ -2,13 +2,13 @@ name: 🔒 Security Scan
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     paths:
       - '**.tf'
       - '**.json'
       - '.github/workflows/security.yml'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
     paths:
       - '**.tf'
       - '**.json'
