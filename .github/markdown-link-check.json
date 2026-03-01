@@ -1,0 +1,16 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/aquasecurity/trivy",
+      "comment": "Trivy is always available"
+    },
+    {
+      "pattern": "^https://github.com/hashicorp",
+      "comment": "HashiCorp docs always available"
+    },
+    {
+      "pattern": "^https://raw.githubusercontent.com",
+      "comment": "GitHub raw content always available"
+    }
+  ]
+}

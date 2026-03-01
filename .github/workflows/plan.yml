@@ -1,0 +1,137 @@
+name: 📋 Terraform Plan
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '.github/workflows/plan.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    name: Generate Terraform Plan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Generate Plan (Test Values)
+        id: plan
+        run: |
+          terraform plan \
+            -var="ami_id=ami-0c55b159cbfafe1f0" \
+            -var="kms_key_arn=arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012" \
+            -var='subnet_ids=["subnet-prod-1a", "subnet-prod-1b"]' \
+            -var="security_group_id=sg-ethereal-hpc" \
+            -no-color \
+            -out=/tmp/tfplan 2>&1 | tee /tmp/plan.log
+        continue-on-error: true
+
+      - name: Format Plan Output
+        if: always()
+        run: |
+          terraform show -no-color /tmp/tfplan > /tmp/tfplan.txt 2>/dev/null || true
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('/tmp/plan.log', 'utf8').substring(0, 65000);
+            
+            const comment = `## 📋 Terraform Plan
+
+\`\`\`terraform
+${planOutput}
+\`\`\`
+
+**Note:** This is a test plan using example values. Actual deployment will use real AWS credentials and values from \`terraform.tfvars\`.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            })
+
+  estimate-cost:
+    name: Estimate Infrastructure Costs
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Generate Cost Estimate
+        run: |
+          infracost breakdown \
+            --path . \
+            --format json \
+            --out-file /tmp/infracost.json || true
+
+      - name: Post Cost Estimate to PR
+        if: always()
+        uses: infracost/actions/comment@v2
+        with:
+          path: /tmp/infracost.json
+          behavior: update
+        continue-on-error: true
+
+  resource-summary:
+    name: Resource Summary
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Analyze Resources
+        run: |
+          echo "## 📊 Infrastructure Summary" > /tmp/summary.md
+          echo "" >> /tmp/summary.md
+          echo "### Resources Defined:" >> /tmp/summary.md
+          echo "- Launch Template (aws_launch_template)" >> /tmp/summary.md
+          echo "- Auto Scaling Group (aws_autoscaling_group)" >> /tmp/summary.md
+          echo "- Scaling Policy (aws_autoscaling_policy)" >> /tmp/summary.md
+          echo "- SNS Notifications (aws_autoscaling_notification)" >> /tmp/summary.md
+          echo "" >> /tmp/summary.md
+          echo "### Key Configuration:" >> /tmp/summary.md
+          grep -E "variable|default" variables.tf | head -20 >> /tmp/summary.md || true
+
+      - name: Post Summary to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('/tmp/summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            })

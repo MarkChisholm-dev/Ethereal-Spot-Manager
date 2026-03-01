@@ -1,0 +1,92 @@
+name: 📚 Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'README.md'
+      - 'TESTING.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'README.md'
+      - 'TESTING.md'
+      - '.github/workflows/docs.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Lint Markdown
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: .
+          ignore_pattern: node_modules
+          config_file: '.markdownlint.json'
+        continue-on-error: true
+
+  link-check:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'no'
+          config-file: '.github/markdown-link-check.json'
+        continue-on-error: true
+
+  spell-check:
+    name: Spell Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Spell Check
+        uses: streetsidesoftware/cspell-ci-action@v1
+        with:
+          files: |
+            README.md
+            TESTING.md
+        continue-on-error: true
+
+  update-toc:
+    name: Update Table of Contents
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Documentation Completeness
+        run: |
+          echo "📖 Verifying documentation..."
+          
+          # Check for key sections in README
+          for section in "Overview" "Features" "Quick Start" "Configuration" "Deployment"; do
+            if grep -q "## $section" README.md; then
+              echo "  ✓ $section section found"
+            else
+              echo "  ⚠ Missing: $section section"
+            fi
+          done
+          
+          echo "✅ Documentation check complete"

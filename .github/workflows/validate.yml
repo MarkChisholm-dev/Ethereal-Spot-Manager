@@ -1,0 +1,97 @@
+name: 🔍 Validate & Lint
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '.github/workflows/validate.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '.github/workflows/validate.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    name: Terraform Format & Syntax
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '>= 1.5.0'
+
+      - name: Format Check
+        run: |
+          echo "🔍 Checking Terraform formatting..."
+          if ! terraform fmt -check -recursive .; then
+            echo "❌ Files need formatting. Run: terraform fmt -recursive"
+            exit 1
+          fi
+          echo "✅ All files properly formatted"
+
+      - name: Terraform Init (validate backend)
+        run: terraform init -backend=false
+
+      - name: Syntax Validation
+        run: |
+          echo "🔍 Validating Terraform syntax..."
+          terraform validate
+          echo "✅ Syntax validation passed"
+
+      - name: Comment PR on Success
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Terraform Validation Passed**\n\n- ✓ Format check\n- ✓ Syntax validation'
+            })
+
+  tflint:
+    name: TFLint (Best Practices)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Initialize TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: |
+          echo "🔍 Checking Terraform best practices..."
+          tflint -f compact
+          echo "✅ Best practices check passed"
+
+      - name: Comment PR on Violations
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **TFLint Issues Found**\n\nRerun `tflint -f compact` locally to see details and fix.'
+            })
