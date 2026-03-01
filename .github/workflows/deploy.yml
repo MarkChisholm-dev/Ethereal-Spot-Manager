@@ -10,12 +10,16 @@ on:
 permissions:
   contents: read
   deployments: write
+  issues: write
   pull-requests: read
 
 jobs:
   pre-deploy-checks:
     name: Pre-Deployment Validation
     runs-on: ubuntu-latest
+    outputs:
+      deploy_enabled: ${{ steps.deploy-mode.outputs.deploy_enabled }}
+      deploy_reason: ${{ steps.deploy-mode.outputs.deploy_reason }}
     
     steps:
       - name: Checkout Repository
@@ -33,17 +37,48 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Check AWS Credentials
+      - name: Determine Deployment Mode
+        id: deploy-mode
         run: |
-          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-            echo "❌ AWS_ACCESS_KEY_ID not configured"
-            echo "ℹ️  Required GitHub secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY"
-            exit 1
+          requested="false"
+          if [[ "${{ github.event.head_commit.message }}" == *"[deploy]"* ]]; then
+            requested="true"
           fi
-          echo "✅ AWS credentials available"
+
+          missing=()
+          for required_secret in \
+            AWS_ACCESS_KEY_ID \
+            AWS_SECRET_ACCESS_KEY \
+            TF_VAR_AMI_ID \
+            TF_VAR_KMS_KEY_ARN \
+            TF_VAR_SUBNET_IDS \
+            TF_VAR_SECURITY_GROUP_ID; do
+            if [ -z "${!required_secret}" ]; then
+              missing+=("$required_secret")
+            fi
+          done
+
+          if [ "$requested" = "true" ] && [ ${#missing[@]} -eq 0 ]; then
+            echo "deploy_enabled=true" >> "$GITHUB_OUTPUT"
+            echo "deploy_reason=real_deploy" >> "$GITHUB_OUTPUT"
+            echo "✅ Real deployment mode enabled"
+          elif [ "$requested" = "true" ]; then
+            echo "deploy_enabled=false" >> "$GITHUB_OUTPUT"
+            echo "deploy_reason=missing_secrets" >> "$GITHUB_OUTPUT"
+            echo "⚠️ [deploy] requested but missing required secrets: ${missing[*]}"
+            echo "ℹ️ Running in example mode (no real AWS deploy)."
+          else
+            echo "deploy_enabled=false" >> "$GITHUB_OUTPUT"
+            echo "deploy_reason=example_mode" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ Example mode: add [deploy] to commit message to run real deployment."
+          fi
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        continue-on-error: true
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_AMI_ID: ${{ secrets.TF_VAR_AMI_ID }}
+          TF_VAR_KMS_KEY_ARN: ${{ secrets.TF_VAR_KMS_KEY_ARN }}
+          TF_VAR_SUBNET_IDS: ${{ secrets.TF_VAR_SUBNET_IDS }}
+          TF_VAR_SECURITY_GROUP_ID: ${{ secrets.TF_VAR_SECURITY_GROUP_ID }}
 
   plan:
     name: Generate Production Plan
@@ -59,14 +94,15 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS Credentials
+        if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
-        continue-on-error: true
 
       - name: Generate terraform.tfvars from Secrets
+        if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
         run: |
           cat > terraform.tfvars << 'EOF'
           # Variables generated from GitHub Secrets
@@ -89,15 +125,22 @@ jobs:
           echo "  - Security Group: ${{ secrets.TF_VAR_SECURITY_GROUP_ID }}"
 
       - name: Terraform Init
+        if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
         run: terraform init
-        continue-on-error: true
 
       - name: Generate Plan
+        if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
         run: terraform plan -input=false -out=/tmp/tfplan
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        continue-on-error: true
+
+      - name: Generate Example Plan Artifact
+        if: needs.pre-deploy-checks.outputs.deploy_enabled != 'true'
+        run: |
+          echo "Example mode - no real plan generated." > /tmp/tfplan
+          echo "Reason: ${{ needs.pre-deploy-checks.outputs.deploy_reason }}" >> /tmp/tfplan
+          echo "✅ Created placeholder plan artifact for demo workflow."
 
       - name: Store Plan Artifact
         uses: actions/upload-artifact@v4
@@ -109,8 +152,8 @@ jobs:
   approval:
     name: Requires Manual Approval
     runs-on: ubuntu-latest
-    needs: [ plan ]
-    if: success()
+    needs: [ pre-deploy-checks, plan ]
+    if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
     
     steps:
       - name: Create Deployment Issue
@@ -131,8 +174,8 @@ jobs:
   deploy:
     name: Deploy to AWS
     runs-on: ubuntu-latest
-    needs: [ approval ]
-    if: contains(github.event.head_commit.message, '[deploy]') || contains(github.event.ref, 'deploy-')
+    needs: [ pre-deploy-checks, approval ]
+    if: needs.pre-deploy-checks.outputs.deploy_enabled == 'true'
     
     environment:
       name: production
@@ -200,26 +243,8 @@ jobs:
 
       - name: Deployment Success Notification
         if: success()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ **Deployment Successful**\n\nInfrastructure has been deployed to AWS.'
-            })
+        run: echo "✅ Deployment completed successfully."
 
       - name: Deployment Failure Notification
         if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '❌ **Deployment Failed**\n\nCheck logs for details and investigate before retrying.'
-            })
+        run: echo "❌ Deployment failed. Check workflow logs for details."
