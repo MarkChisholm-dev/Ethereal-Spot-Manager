@@ -1,0 +1,48 @@
+# Example variables file for testing
+# Copy this to terraform.tfvars and fill in with your values
+# OR use: terraform plan -var-file=test.tfvars
+
+# Required Variables
+ami_id            = "ami-0c55b159cbfafe1f0"  # Example Amazon Linux 2 AMI
+kms_key_arn       = "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+subnet_ids        = ["subnet-12345678", "subnet-87654321"]
+security_group_id = "sg-0123456789abcdef0"
+
+# Instance Configuration
+instance_type          = "g4dn.xlarge"
+fallback_instance_type = "g5.xlarge"
+
+# Capacity Settings
+on_demand_base   = 2
+desired_capacity = 10
+min_size         = 2
+max_size         = 50
+
+# Storage Configuration
+disk_size      = 100
+ebs_iops       = 3000
+ebs_throughput = 125
+
+# Health & Lifecycle
+health_check_type         = "EC2"
+health_check_grace_period = 300
+max_instance_lifetime     = 604800  # 1 week
+
+# Auto Scaling
+enable_cpu_scaling     = true
+target_cpu_utilization = 70
+
+# Tagging
+environment = "development"
+cost_center = "HPC-Engineering"
+project     = "Ethereal-Cloud-Systems"
+
+# Optional: SNS Notifications
+# sns_topic_arn = "arn:aws:sns:us-east-1:123456789012:fleet-notifications"
+
+# Optional: Custom bootstrap script
+# bootstrap_script = <<-EOF
+#   #!/bin/bash
+#   echo "Custom initialization"
+#   # Your custom commands here
+# EOF
