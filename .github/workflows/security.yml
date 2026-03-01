@@ -1,5 +1,6 @@
 name: 🔒 Security Scan
 
+# Workflow validates Terraform configurations for security compliance
 on:
   push:
     branches: [ main ]
