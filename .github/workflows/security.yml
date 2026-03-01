@@ -78,7 +78,7 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const status = ${{ steps.checkov.outcome === 'success' ? 'true' : 'false' }};
+            const status = '${{ steps.checkov.outcome }}' === 'success';
             const message = status 
               ? '✅ **Checkov Policy Check Passed**'
               : '⚠️ **Checkov Policy Violations Found**\n\nSee job logs for details.';
