@@ -53,13 +53,11 @@ jobs:
             const fs = require('fs');
             const planOutput = fs.readFileSync('/tmp/plan.log', 'utf8').substring(0, 65000);
             
-            const comment = `## 📋 Terraform Plan
-
-\`\`\`terraform
-${planOutput}
-\`\`\`
-
-**Note:** This is a test plan using example values. Actual deployment will use real AWS credentials and values from \`terraform.tfvars\`.`;
+            const comment = "## 📋 Terraform Plan\n\n" +
+              "```terraform\n" +
+              planOutput + "\n" +
+              "```\n\n" +
+              "**Note:** This is a test plan using example values. Actual deployment will use real AWS credentials and values from `terraform.tfvars`.";
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
