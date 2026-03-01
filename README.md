@@ -447,7 +447,7 @@ For issues and questions:
 
 ## Changelog
 
-### v1.2.0 (Latest)
+### v2.0 (Latest)
 - ✅ Added comprehensive auto-scaling policies
 - ✅ Implemented health check configuration
 - ✅ Added capacity rebalancing for Spot instances
