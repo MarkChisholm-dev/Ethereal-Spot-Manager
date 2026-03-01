@@ -45,6 +45,24 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         continue-on-error: true
 
+      - name: Check for terraform.tfvars
+        run: |
+          echo "📋 Checking deployment configuration..."
+          if [ ! -f terraform.tfvars ]; then
+            echo "⚠️  WARNING: terraform.tfvars not found"
+            echo ""
+            echo "To complete deployment, you MUST commit terraform.tfvars with:"
+            echo "  • ami_id"
+            echo "  • kms_key_arn"
+            echo "  • subnet_ids"
+            echo "  • security_group_id"
+            echo ""
+            echo "See terraform.tfvars.example for template"
+            echo "⏭️  Continuing with validation..."
+          else
+            echo "✅ terraform.tfvars found"
+          fi
+
   plan:
     name: Generate Production Plan
     runs-on: ubuntu-latest
@@ -66,12 +84,28 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
         continue-on-error: true
 
+      - name: Check for terraform.tfvars
+        run: |
+          if [ ! -f terraform.tfvars ]; then
+            echo "❌ ERROR: terraform.tfvars file not found"
+            echo ""
+            echo "To deploy, you must create terraform.tfvars with required variables:"
+            echo "  ami_id = \"ami-xxxxx\""
+            echo "  kms_key_arn = \"arn:aws:kms:...\""
+            echo "  subnet_ids = [\"subnet-xxx\", \"subnet-yyy\"]"
+            echo "  security_group_id = \"sg-xxxxx\""
+            echo ""
+            echo "See terraform.tfvars.example for reference"
+            exit 1
+          fi
+          echo "✅ terraform.tfvars found and will be used"
+
       - name: Terraform Init
         run: terraform init
         continue-on-error: true
 
       - name: Generate Plan
-        run: terraform plan -out=/tmp/tfplan
+        run: terraform plan -input=false -out=/tmp/tfplan
         continue-on-error: true
 
       - name: Store Plan Artifact
@@ -137,8 +171,21 @@ jobs:
           name: tfplan
           path: /tmp/
 
+      - name: Verify Plan Artifact
+        run: |
+          if [ ! -f /tmp/tfplan ]; then
+            echo "❌ ERROR: Saved terraform plan not found"
+            echo ""
+            echo "This usually means:"
+            echo "  1. The plan job failed or was skipped"
+            echo "  2. The artifact expired (default: 5 days)"
+            echo "  3. The plan was not properly saved"
+            exit 1
+          fi
+          echo "✅ Plan artifact found"
+
       - name: Apply Terraform Plan
-        run: terraform apply -auto-approve /tmp/tfplan
+        run: terraform apply -input=false -no-color /tmp/tfplan
         continue-on-error: true
 
       - name: Save Terraform State
