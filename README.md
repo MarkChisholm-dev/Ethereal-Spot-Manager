@@ -1,7 +1,7 @@
 # Ethereal Spot Compute Orchestrator
 
 # Security Compliance Badge
-[![Security Compliance Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security-scan.yml)
+[![📚 Docs](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml)
 
 [![Security: TPN](https://img.shields.io/badge/Compliance-TPN--Ready-red?style=for-the-badge)](https://www.ttpn.org/)
 
