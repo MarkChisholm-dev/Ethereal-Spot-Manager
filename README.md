@@ -5,6 +5,10 @@
 **Supercharge your HPC infrastructure with intelligent GPU cluster orchestration**
 
 [![📚 Docs](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/docs.yml)
+[![🔒 Security Scan](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/security.yml)
+[![🚀 Deploy Infrastructure](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/deploy.yml)
+[![🧪 Test Suite](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/test.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/test.yml)
+[![🔍 Validate & Lint](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/validate.yml/badge.svg)](https://github.com/MarkChisholm-dev/Ethereal-Spot-Manager/actions/workflows/validate.yml)
 [![Security: TPN](https://img.shields.io/badge/Compliance-TPN--Ready-red?style=for-the-badge)](https://www.ttpn.org/)
 [![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
@@ -482,6 +486,36 @@ Contributions welcome! Before submitting PRs, ensure:
 ## 📜 License
 
 See [LICENSE](LICENSE) for details.
+
+---
+
+## 💬 Support & Community
+
+**Report issues and ask questions:**
+
+| Channel | Use For |
+|---------|----------|
+| 🐛 **[GitHub Issues](https://github.com/MarkChisholm-dev/ethereal-spot-manager/issues)** | Bug reports & feature requests |
+| 💬 **[GitHub Discussions](https://github.com/MarkChisholm-dev/ethereal-spot-manager/discussions)** | Questions & best practices |
+| 📧 **[Security Issues](SECURITY.md)** | Report vulnerabilities privately |
+
+---
+
+## 📝 Changelog
+
+### v2.0 (Latest)
+- ✨ Added comprehensive auto-scaling policies
+- 🔐 Implemented health check configuration
+- ⚡ Added capacity rebalancing for Spot instances
+- 🛡️ Enhanced security with IMDSv2 hardening
+- 💾 Added gp3 IOPS and throughput configuration
+- 🔔 Implemented SNS notifications for scale events
+- 💳 Added comprehensive tagging for cost attribution
+- 🧪 Created automated testing framework
+- ✔️ Added validation for all critical variables
+- 📚 Improved documentation with testing guide
+- 🔄 Added max instance lifetime for automatic refresh
+- 📊 Enhanced outputs for monitoring integration
 
 ---
 
